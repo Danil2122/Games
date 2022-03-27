@@ -12,20 +12,40 @@ public class Main {
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         String s = File.separator;
-        String wayZip = "C:" + s + "Users" + s + "Эльдо" + s + "IdeaProjects" + s + "Java Core(netology)" + s +
-                "Gamess" + s + "savegames" + s + "zip.zip";
-        String wayDirectorySaveGames = "C:" + s + "Users" + s + "Эльдо" + s + "IdeaProjects" + s + "Java Core(netology)" + s +
-                "Gamess" + s + "savegames";
+        String wayDirectoryGames = "C:" + s + "Users" + s + "Эльдо" + s + "IdeaProjects" + s +
+                "Java Core(netology)" + s + "Gamess";
+        String wayZip = wayDirectoryGames + s + "savegames" + s + "zip.zip";
         List<String> wayFile = new ArrayList<>();
-        wayFile.add("C:" + s + "Users" + s + "Эльдо" + s + "IdeaProjects" + s + "Java Core(netology)" + s +
-                "Gamess" + s + "savegames" + s + "gameProgress.bin");
-        wayFile.add("C:" + s + "Users" + s + "Эльдо" + s + "IdeaProjects" + s + "Java Core(netology)" + s +
-                "Gamess" + s + "savegames" + s + "gameProgress1.bin");
-        wayFile.add("C:" + s + "Users" + s + "Эльдо" + s + "IdeaProjects" + s + "Java Core(netology)" + s +
-                "Gamess" + s + "savegames" + s + "gameProgress2.bin");
+        wayFile.add(wayDirectoryGames + s + "savegames" + s + "gameProgress.bin");
+        wayFile.add(wayDirectoryGames + s + "savegames" + s + "gameProgress1.bin");
+        wayFile.add(wayDirectoryGames + s + "savegames" + s + "gameProgress2.bin");
 
+        StringBuilder sb = new StringBuilder();
         Installation installation = new Installation();
-        installation.install();
+        //src
+        sb.append(installation.installDirectory(wayDirectoryGames, "src"));
+        sb.append("   ");
+        sb.append(installation.installDirectory(wayDirectoryGames + s + "src", "test"));
+        sb.append("   ");
+        sb.append(installation.installDirectory(wayDirectoryGames + s + "src", "main"));
+        sb.append(installation.installFile(wayDirectoryGames, "src" + s + "main", "Main.java"));
+        sb.append(installation.installFile(wayDirectoryGames, "src" + s + "main", "Utils.java"));
+        //res
+        sb.append(installation.installDirectory(wayDirectoryGames, "res"));
+        sb.append("   ");
+        sb.append(installation.installDirectory(wayDirectoryGames + s + "src", "drawables"));
+        sb.append("   ");
+        sb.append(installation.installDirectory(wayDirectoryGames + s + "src", "vectors"));
+        sb.append("   ");
+        sb.append(installation.installDirectory(wayDirectoryGames + s + "src", "icons"));
+        //savegames
+        sb.append(installation.installDirectory(wayDirectoryGames, "savegames"));
+        //temp
+        sb.append(installation.installDirectory(wayDirectoryGames, "temp"));
+        sb.append(installation.installFile(wayDirectoryGames, "temp", "temp.txt"));
+
+
+        addStringBuilder(sb.toString(), wayDirectoryGames + s + "temp", "temp.txt");
         GameProgress gameProgress = new GameProgress(100, 50, 6, 20.5);
         GameProgress gameProgress1 = new GameProgress(500, 95, 30, 80.8);
         GameProgress gameProgress2 = new GameProgress(62, 25, 3, 10.3);
@@ -36,10 +56,19 @@ public class Main {
         saveGame(wayFile.get(2), gameProgress2);
 
         zipFiles(wayZip, wayFile);
-        deleteFile(wayDirectorySaveGames);
-        openZip(wayZip, wayDirectorySaveGames);
+        deleteFile(wayDirectoryGames + s + "savegames");
+        openZip(wayZip, wayDirectoryGames + s + "savegames");
         openProgress(wayFile);
+    }
 
+    public static void addStringBuilder(String stringBuilder, String way, String file) throws IOException {
+        File temps = new File(way, file);
+        if (temps.exists()) {
+            FileWriter fl = new FileWriter(temps);
+            fl.write(stringBuilder);
+            fl.flush();
+            fl.close();
+        }
     }
 
     public static void saveGame(String wayFile, GameProgress gameProgress) {
@@ -50,9 +79,9 @@ public class Main {
         }
     }
 
-    public static void zipFiles(String wayFile, List<String> wayFileZip) {
-        try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(wayFile))) {
-            for (String s : wayFileZip) {
+    public static void zipFiles(String wayFileZip, List<String> wayFile) {
+        try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(wayFileZip))) {
+            for (String s : wayFile) {
                 File fileZip = new File(s);
                 FileInputStream fis = new FileInputStream(fileZip);
                 ZipEntry zipEntry = new ZipEntry(fileZip.getName());
@@ -74,7 +103,7 @@ public class Main {
 
         File file1 = new File(s);
         File[] file2 = file1.listFiles();
-        Arrays.stream(file2).filter(x -> x.getName().equals("zip.zip"));
+//        Arrays.stream(file2).filter(x -> !(x.getName().equals("zip.zip")) ? x.delete() : );
         for (File f : file2) {
             if (!(f.getName().equals("zip.zip"))) {
                 f.delete();
@@ -120,10 +149,13 @@ public class Main {
     }
 
     public static void openProgress(List<String> wayFile) throws IOException, ClassNotFoundException {
-        for (String way : wayFile) {
-            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(way));
-            GameProgress gameProgress = (GameProgress) ois.readObject();
-            System.out.println(gameProgress);
-        }
+        ObjectInputStream ois = new ObjectInputStream(new FileInputStream(wayFile.get(0)));
+        GameProgress gameProgress = (GameProgress) ois.readObject();
+        System.out.println(gameProgress);
+//        for (String way : wayFile) {
+//            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(way));
+//            GameProgress gameProgress = (GameProgress) ois.readObject();
+//            System.out.println(gameProgress);
+//        }
     }
 }
